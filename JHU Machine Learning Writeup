@@ -1,0 +1,43 @@
+Write-Up
+I started the project by partitioning the training data set into a training portion and a test portion.  I did this in order to ensure cross validation of the data.  Otherwise, my model could be over-fitting the training data due to including outside “noise.”  By using a partition, I can find a model, then use the prediction function in R to see if this does in fact predict the portioned test data.  As for the variables, I chose to get rid of those that contained missing values.  I followed the suggestion in lecture that explained missing values can affect algorithms, which seems reasonable as they rely on consistent data.  If data was missing from the data set, I would run into issues with bias predictors.  I also dropped variables that contained NAs as they are also troublesome to algorithms and do not help when quantifying predictors.  
+Lastly, I wanted to focus on quantifying variables like sensors, and neglecting those that were not.  For example, I dropped variables containing timestamp, user name, new window, and num window.  I dropped the timestamps as I feel the time of day should not affect the results, unless there are medicinal reasons that suggest otherwise (which for the sake of this project I did not do in depth research and instead kept it simple).  Next, I chose to get rid of user name as that is a clear non-factor when figuring out class type.  New window and num window seemed to be intervals of time and had issues with perfectly predicting the data by themselves.  This seemed rather odd and had issues with covariance, therefore I dropped them from the set.  I backed this logic with a non-zero variance test.  The NZV test also agreed with my logic and resulted in the dropped new window.  Finally, I tested the covariance amongst variables and the only covariance between variables are the ones that make sense: e.g. accel_belt_x and accel_belt_y, which rely on the acceleration of the user.  Ignoring this type of covariance, I chose my final set of variables.  This left 54 variables including the classe variables, resulting in 53 predictors and the desired variable – classe.
+Results
+As a result, I had an accuracy of 99.4% on the training data.  With the 53 predictors, only one of the observations was not correctly predicted.  To ensure this wasn’t an issue of overfitting due to noise, I next predicted the partitioned test set.  The result was 99% successful prediction and the predicted classe matched entirely to the actual classe in the test set.  There was an error rate of roughly 0.01%, coinciding with the 99.9% accuracy.  According to my model predictions, the pml_test.csv should result in a classe “A” for all 20 observations.
+To ensure the test results above, I did a second experiment where I partitioned the data into 3 parts – a training set, cross validation set, and a test set, where the test set was part of the pml_training file and not a part of the pml_testing file.  I used this logic because the pml_testing file does not contain the true classe variable therefore, I wanted to be certain my algorithm works the best it could.  By having a 3rd set from the pml_training, I can ensure that the predictors from my algorithm either match the true value in the classe or not.  As a result, the training set had a 99.5% accuracy, the cross validation had a 99.9% accuracy and the test set had 100% accuracy.  Attached on the next page is an appendix with charts displaying the results in R.
+
+
+ 
+Appendix
+Algorithm Accuracy Results
+
+Training Set (Random Forest):
+
+•	Sample Sizes: 11,776 observations
+•	53 predictors
+•	5 classes: ‘A’, ‘B’, ‘C’, ‘D’, ‘E’
+•	Resampling: Bootstrapped (25 reps)
+
+
+
+
+Cross-validation Set:
+
+•	Prediction of 3,923 observations
+•	Overall Statistics
+•	Accuracy: 99.97%
+•	95% CI: (0.9986, 1)
+
+
+
+Test Set:
+
+•	Prediction of 3,923 observations
+•	Overall Statistics
+•	Accuracy: 100%
+•	95% CI: (0.9991, 1)
+
+
+
+
+
+
