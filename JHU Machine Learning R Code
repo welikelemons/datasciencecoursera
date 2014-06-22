@@ -1,0 +1,108 @@
+#MY ACTUAL ASSIGNMENT
+install.packages("caret", dependencies = c("Depends", "Suggests"))
+install.packages("BradleyTerry2")
+install.packages("RcppEigen")
+install.packages("prodlim")
+install.packages("randomForest")
+library("caret");
+library("randomForest");
+library("ipred");
+library("gbm");
+library("randomForest"); 
+library("caret"); 
+# load data
+trainRawData <- read.csv("C:/Users/M/Downloads/pmltraining.csv",na.strings=c("NA",""))
+actualTestData <- read.csv("C:/Users/M/Downloads/pmltesting.csv",na.strings=c("NA",""))
+# discard NAs
+NAs <- apply(trainRawData,2,function(x) {sum(is.na(x))}) 
+validData <- trainRawData[,which(NAs == 0)]
+# make training set
+trainIndex <- createDataPartition(y = validData$classe, p=0.6,list=FALSE) # 3927 rows
+trainData <- validData[trainIndex,]
+testData <- validData[-trainIndex,]
+#find unuseful predicitors
+nsv <- nearZeroVar(trainData,saveMetrics=TRUE)
+nsv
+# correlated predictors (PCA)
+#M <- abs(cor(trainData[,-55]))
+#diag(M) <- 0
+#which(M > 0.88,arr.ind=T)
+# discards unuseful predictors
+removeIndex <- grep("timestamp|X|user_name|new_window|num_window",names(trainData))
+trainData <- trainData[,-removeIndex]
+removeIndex <- grep("timestamp|X|user_name|new_window|num_window",names(testData))
+testData <- testData[,-removeIndex]
+removeIndex <- grep("predRight",names(testData))
+testData <- testData[,-removeIndex]
+# make model
+set.seed(32343)
+modelFit <- train(trainData$classe ~.,data=trainData,
+                  preProcess=c("center","scale"),method="rf")
+modFit <- train(trainData$classe ~.,data = trainData,method="rf")
+modFit
+pred <- predict(modFit,testData); testData$predRight <- pred==testData$classe
+table(pred,testData$classe)
+#USED this for testing and accuracy
+predictions <- predict(modFit,newdata=testData)
+predictions
+confusionMatrix(predictions,testData$classe)
+
+modFit$finalModel
+
+
+
+NAs <- apply(actualTestData,2,function(x) {sum(is.na(x))}) 
+validDataForTesting <- actualTestData[,which(NAs == 0)]
+removeIndex <- grep("timestamp|X|user_name|new_window|num_window",names(validDataForTesting))
+finalTest <- validDataForTesting[,-removeIndex]
+predictionsFinalFinal <- predict(modFit,newdata=finalTest)
+predictionsFinalFinal
+confusionMatrix(predictionsFinalFinal,finalTest$classe)
+
+
+#For 3 partitions testing:
+install.packages("AppliedPredictiveModeling")
+library(AppliedPredictiveModeling)
+data(segmentationOriginal)
+library(caret)
+trainIndex <- createDataPartition(y = validData$Case, p=0.6,list=FALSE) # 3927 rows
+trainData <- validData[trainIndex,]
+testData <- validData[-trainIndex,]
+seed(125)
+
+
+
+
+trainRawData <- read.csv("C:/Users/M/Downloads/pmltraining.csv",na.strings=c("NA",""))
+# discard NAs
+NAs <- apply(trainRawData,2,function(x) {sum(is.na(x))}) 
+validData <- trainRawData[,which(NAs == 0)]
+trainIndex <- createDataPartition(y = validData$classe, p=0.6,list=FALSE) # 3927 rows
+trainData <- validData[trainIndex,]
+otherData <- validData[-trainIndex,]
+trainIndex <- createDataPartition(y = otherData$classe, p=0.5,list=FALSE)
+crossData <- otherData[trainIndex,]
+testData <- otherData[-trainIndex,]
+removeIndex <- grep("timestamp|X|user_name|new_window|num_window",names(trainData))
+trainData <- trainData[,-removeIndex]
+removeIndex <- grep("timestamp|X|user_name|new_window|num_window",names(crossData))
+crossData <- crossData[,-removeIndex]
+removeIndex <- grep("timestamp|X|user_name|new_window|num_window",names(testData))
+testData <- testData[,-removeIndex]
+# make model
+set.seed(32343)
+modFit <- train(trainData$classe ~.,data = trainData,method="rf")
+modFit
+pred <- predict(modFit,otherData); otherData$predRight <- pred==testData$classe
+table(pred,testData$classe)
+#USED this for testing and accuracy
+predictions <- predict(modFit,newdata=crossData)
+predictions
+confusionMatrix(predictions,crossData$classe)
+
+modFit$finalModel
+
+
+predictionsz <- predict(modFit,newdata=testData)
+predictionsz
+confusionMatrix(predictionsz,testData$classe)
